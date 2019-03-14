@@ -62,7 +62,7 @@ matrix_t *matrix_multiply(matrix_t *A, matrix_t *B)
 {
     //Não podemos multiplicar
     if(A->cols != B->rows){
-        printf("Impossível multiplicar");
+        printf("Impossível multiplicar\n");
         return NULL;
     }
 
@@ -88,7 +88,7 @@ void matrix_print(matrix_t *m)
    int i, j;
    for (i = 0; i < m->rows; i++) {
       for (j = 0; j < m->cols; j++) {
-         printf("%.17f ", m->data[i][j]);
+         printf("%.2f ", m->data[i][j]);
       }
       printf("\n");
    }
@@ -99,7 +99,7 @@ matrix_t *matrix_sum(matrix_t *A, matrix_t *B)
 {
     //Não podemos somar
     if( (A->rows != B->rows) && (A->cols != B->cols) ){
-        printf("Impossível somar");
+        printf("Impossível somar\n");
         return NULL;
     }
 

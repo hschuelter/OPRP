@@ -2,7 +2,7 @@
 
 CC = gcc
 CCFLAGS = -Wall -pg
-LDFLAGS =
+LDFLAGS = -Wall -pg -pthread
 TARGET = main
 
 %.o: %.c
@@ -15,8 +15,8 @@ all: $(TARGET)
 
 # Dependencias
 
-main: matrix.o main.c
 matrix.o: matrix.c matrix.h
+main: matrix.o main.c
 
 clean:
 	rm -f *.o *~ $(TARGET)

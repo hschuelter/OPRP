@@ -12,8 +12,17 @@ typedef struct {
       int cols;
 } matrix_t;
 
+typedef struct {
+	int id;
+	matrix_t *A;
+	matrix_t *B;
+	matrix_t *C;
+	int l_i;
+	int l_f;
+} DadosThread;
+
 /*
- * All functions must return a new matriz (when need)
+ * All functions must return a new matriz (when needed)
  */
 
 
@@ -27,7 +36,15 @@ void matrix_fill(matrix_t *m, double val);
 
 matrix_t *matrix_multiply(matrix_t *A, matrix_t *B);
 
+matrix_t *matrix_multiply_parallel(matrix_t *A, matrix_t *B, int nthreads);
+
+void *multiply_thread(void *arg);
+
 matrix_t *matrix_sum(matrix_t *A, matrix_t *B);
+
+matrix_t *matrix_sum_parallel(matrix_t *A, matrix_t *B, int nthreads);
+
+void *sum_thread(void *arg);
 
 matrix_t *matrix_sort(matrix_t *A);
 

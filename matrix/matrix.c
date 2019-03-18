@@ -4,6 +4,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <pthread.h>
 #include <assert.h>
 #include "matrix.h"
 
@@ -82,6 +83,79 @@ matrix_t *matrix_multiply(matrix_t *A, matrix_t *B)
     return C;
 }
 
+
+//Cada thread é responsável por um determinado número de linhas da matriz C
+matrix_t *matrix_multiply_parallel(matrix_t *A, matrix_t *B, int nthreads){
+    DadosThread *dt = NULL;
+    pthread_t *threads = NULL;
+
+    if (!(dt = (DadosThread *) malloc(sizeof(DadosThread) * nthreads))) {
+       printf("Erro ao alocar dados da thread...\n");
+       exit(EXIT_FAILURE);
+    }
+
+    if (!(threads = (pthread_t *) malloc(sizeof(pthread_t) * nthreads))) {
+        printf("Erro ao alocar as threads...\n");
+               exit(EXIT_FAILURE);
+    }
+
+    int nrows = A->rows;
+    int ncols = B->cols;
+    int i;
+
+    matrix_t *C = matrix_create(nrows, ncols);
+
+    long long int x = nrows / nthreads;
+    for (i = 0; i < nthreads-1; i++) {
+        dt[i].id = i;
+        dt[i].l_i = x*i;
+        dt[i].l_f = x*i + x - 1;
+
+        dt[i].A = A;
+        dt[i].B = B;
+        dt[i].C = C;
+        pthread_create(&threads[i], NULL, multiply_thread, (void *) (dt + i));
+    }
+    dt[i].id = i;
+    dt[i].l_i = x*i;
+    dt[i].l_f = nrows - 1;
+
+    dt[i].A = A;
+    dt[i].B = B;
+    dt[i].C = C;
+    pthread_create(&threads[i], NULL, multiply_thread, (void *) (dt + i));
+
+
+    for (i = 0; i < nthreads; i++) {
+        pthread_join(threads[i], NULL);
+    }
+
+    free(dt);
+    free(threads);
+
+    return C;
+}
+
+void *multiply_thread(void *arg){
+    DadosThread *p = (DadosThread *) arg;
+
+  printf("Thread %d: %d %d\n", p->id, p->l_i, p->l_f);
+    
+    
+    int i, j, k;
+    for(i = p->l_i; i <= p->l_f; i++){ //Percorre as linhas de C relevantes
+        for(j = 0; j < p->C->cols; j++){ //Percorre cada coluna de C
+            for(k = 0; k < p->A->cols; k++){ 
+                p->C->data[i][j] += p->A->data[i][k] + p->B->data[k][j];
+            }
+        }
+    }
+
+
+    return NULL;    
+}
+
+
 void matrix_print(matrix_t *m)
 {
 
@@ -115,6 +189,70 @@ matrix_t *matrix_sum(matrix_t *A, matrix_t *B)
 
     return C;
 }
+
+matrix_t *matrix_sum_parallel(matrix_t *A, matrix_t *B, int nthreads){
+    DadosThread *dt = NULL;
+    pthread_t *threads = NULL;
+
+    if (!(dt = (DadosThread *) malloc(sizeof(DadosThread) * nthreads))) {
+       printf("Erro ao alocar dados da thread...\n");
+       exit(EXIT_FAILURE);
+    }
+
+    if (!(threads = (pthread_t *) malloc(sizeof(pthread_t) * nthreads))) {
+        printf("Erro ao alocar as threads...\n");
+               exit(EXIT_FAILURE);
+    }
+
+    int nrows = A->rows;
+    int ncols = A->cols;
+    int i;
+
+    matrix_t *C = matrix_create(nrows, ncols);
+    
+    long long int x = nrows * ncols / nthreads;
+    for (i = 0; i < nthreads-1; i++) {
+       dt[i].id = i;
+       dt[i].l_i = x*i;
+       dt[i].l_f = x*i + x - 1;
+
+       dt[i].A = A;
+       dt[i].B = B;
+       dt[i].C = C;
+       pthread_create(&threads[i], NULL, sum_thread, (void *) (dt + i));
+    }
+    dt[i].id = i;
+    dt[i].l_i = x*i;
+    dt[i].l_f = (nrows * ncols) - 1;
+
+    dt[i].A = A;
+    dt[i].B = B;
+    dt[i].C = C;
+    pthread_create(&threads[i], NULL, sum_thread, (void *) (dt + i));
+
+
+    for (i = 0; i < nthreads; i++) {
+        pthread_join(threads[i], NULL);
+    }
+
+    free(dt);
+    free(threads);
+
+    return C;
+}
+
+void *sum_thread(void *arg){
+    DadosThread *p = (DadosThread *) arg;
+    int i;
+    for(i = p->l_i; i <= p->l_f; i++){
+        p->C->data[0][i] = p->A->data[0][i] + p->B->data[0][i];
+    }
+
+  // printf("Thread %d terminou\n", p->id);
+
+  return NULL;
+}
+
 
 matrix_t *matrix_cpy(matrix_t *A){
     int i;

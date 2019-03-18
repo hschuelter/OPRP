@@ -1,8 +1,8 @@
 # GNU Makefile
 
 CC = gcc
-CCFLAGS = -Wall -pg
-LDFLAGS = -Wall -pg -pthread
+CCFLAGS = -Wall
+LDFLAGS = -Wall -pthread
 TARGET = main
 
 %.o: %.c

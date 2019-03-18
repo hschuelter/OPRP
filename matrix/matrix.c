@@ -86,6 +86,12 @@ matrix_t *matrix_multiply(matrix_t *A, matrix_t *B)
 
 //Cada thread é responsável por um determinado número de linhas da matriz C
 matrix_t *matrix_multiply_parallel(matrix_t *A, matrix_t *B, int nthreads){
+   if(A->cols != B->rows){
+        printf("Impossível multiplicar\n");
+        exit(EXIT_FAILURE);
+    }
+
+
     DadosThread *dt = NULL;
     pthread_t *threads = NULL;
 
@@ -102,29 +108,44 @@ matrix_t *matrix_multiply_parallel(matrix_t *A, matrix_t *B, int nthreads){
     int nrows = A->rows;
     int ncols = B->cols;
     int i;
+    long long int x;
 
     matrix_t *C = matrix_create(nrows, ncols);
+    
+    if(nthreads > nrows){ //Não é possível dividir entre todas a threads
+        nthreads = nrows;
+        for (i = 0; i < nthreads; i++) {
+            dt[i].id = i;
+            dt[i].l_i = i;
+            dt[i].l_f = i;
 
-    long long int x = nrows / nthreads;
-    for (i = 0; i < nthreads-1; i++) {
+            dt[i].A = A;
+            dt[i].B = B;
+            dt[i].C = C;
+            pthread_create(&threads[i], NULL, multiply_thread, (void *) (dt + i));
+        }
+    }
+    else{
+        x = nrows / nthreads;
+        for (i = 0; i < nthreads-1; i++) {
+            dt[i].id = i;
+            dt[i].l_i = x*i;
+            dt[i].l_f = x*i + x - 1;
+
+            dt[i].A = A;
+            dt[i].B = B;
+            dt[i].C = C;
+            pthread_create(&threads[i], NULL, multiply_thread, (void *) (dt + i));
+        }
         dt[i].id = i;
         dt[i].l_i = x*i;
-        dt[i].l_f = x*i + x - 1;
+        dt[i].l_f = nrows - 1;
 
         dt[i].A = A;
         dt[i].B = B;
         dt[i].C = C;
         pthread_create(&threads[i], NULL, multiply_thread, (void *) (dt + i));
     }
-    dt[i].id = i;
-    dt[i].l_i = x*i;
-    dt[i].l_f = nrows - 1;
-
-    dt[i].A = A;
-    dt[i].B = B;
-    dt[i].C = C;
-    pthread_create(&threads[i], NULL, multiply_thread, (void *) (dt + i));
-
 
     for (i = 0; i < nthreads; i++) {
         pthread_join(threads[i], NULL);
@@ -139,14 +160,13 @@ matrix_t *matrix_multiply_parallel(matrix_t *A, matrix_t *B, int nthreads){
 void *multiply_thread(void *arg){
     DadosThread *p = (DadosThread *) arg;
 
-  printf("Thread %d: %d %d\n", p->id, p->l_i, p->l_f);
-    
+  // printf("Thread %d: %d %d\n", p->id, p->l_i, p->l_f);
     
     int i, j, k;
     for(i = p->l_i; i <= p->l_f; i++){ //Percorre as linhas de C relevantes
         for(j = 0; j < p->C->cols; j++){ //Percorre cada coluna de C
             for(k = 0; k < p->A->cols; k++){ 
-                p->C->data[i][j] += p->A->data[i][k] + p->B->data[k][j];
+                p->C->data[i][j] += p->A->data[i][k]*p->B->data[k][j];
             }
         }
     }

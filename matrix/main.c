@@ -50,13 +50,13 @@ int main(int argc, char **argv)
    end_time = wtime();
 
 
-   printf("A:\n");
+   printf("\nA:\n");
    matrix_print(A);
    
-   printf("B:\n");
+   printf("\nB:\n");
    matrix_print(B);
    
-   printf("C:\n");
+   printf("\nC:\n");
    matrix_print(C);
 
 

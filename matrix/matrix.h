@@ -17,6 +17,10 @@ typedef struct {
 	matrix_t *A;
 	matrix_t *B;
 	matrix_t *C;
+
+    double *vet;
+    int vet_size;
+    
 	int l_i;
 	int l_f;
 } DadosThread;
@@ -47,6 +51,12 @@ matrix_t *matrix_sum_parallel(matrix_t *A, matrix_t *B, int nthreads);
 void *sum_thread(void *arg);
 
 matrix_t *matrix_sort(matrix_t *A);
+
+matrix_t *mergesort_parallel(matrix_t* A, int nthreads);
+void *mergesort_thread(void *arg);
+
+matrix_t *mergesort(matrix_t *A);
+void merge(double *vet, int l, int m, int r);
 
 void matrix_print(matrix_t *m);
 

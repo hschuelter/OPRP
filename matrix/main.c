@@ -41,7 +41,7 @@ int main(int argc, char **argv)
 
 
 
-   matrix_t *C = matrix_multiply_parallel(A, B, nthreads);
+   matrix_t *C = mergesort_parallel(A, nthreads);
 
    // C = matrix_multiply(A,B);
 
@@ -52,10 +52,10 @@ int main(int argc, char **argv)
 
    printf("\nA:\n");
    matrix_print(A);
-   
-   printf("\nB:\n");
-   matrix_print(B);
-   
+
+   // printf("\nB:\n");
+   // matrix_print(B);
+
    printf("\nC:\n");
    matrix_print(C);
 
@@ -75,4 +75,3 @@ int main(int argc, char **argv)
 
    return EXIT_SUCCESS;
 }
-

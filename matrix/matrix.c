@@ -111,7 +111,7 @@ matrix_t *matrix_multiply_parallel(matrix_t *A, matrix_t *B, int nthreads){
     long long int x;
 
     matrix_t *C = matrix_create(nrows, ncols);
-    
+
     if(nthreads > nrows){ //Não é possível dividir entre todas a threads
         nthreads = nrows;
         for (i = 0; i < nthreads; i++) {
@@ -161,18 +161,18 @@ void *multiply_thread(void *arg){
     DadosThread *p = (DadosThread *) arg;
 
   // printf("Thread %d: %d %d\n", p->id, p->l_i, p->l_f);
-    
+
     int i, j, k;
     for(i = p->l_i; i <= p->l_f; i++){ //Percorre as linhas de C relevantes
         for(j = 0; j < p->C->cols; j++){ //Percorre cada coluna de C
-            for(k = 0; k < p->A->cols; k++){ 
+            for(k = 0; k < p->A->cols; k++){
                 p->C->data[i][j] += p->A->data[i][k]*p->B->data[k][j];
             }
         }
     }
 
 
-    return NULL;    
+    return NULL;
 }
 
 
@@ -229,7 +229,7 @@ matrix_t *matrix_sum_parallel(matrix_t *A, matrix_t *B, int nthreads){
     int i;
 
     matrix_t *C = matrix_create(nrows, ncols);
-    
+
     long long int x = nrows * ncols / nthreads;
     for (i = 0; i < nthreads-1; i++) {
        dt[i].id = i;
@@ -304,3 +304,222 @@ matrix_t *matrix_sort(matrix_t *A)
 
     return C;
 }
+
+int min(int x, int y) { return (x<y)? x :y; }
+
+matrix_t *mergesort_parallel(matrix_t* A, int nthreads){
+    DadosThread *dt = NULL;
+    pthread_t *threads = NULL;
+
+    if (!(dt = (DadosThread *) malloc(sizeof(DadosThread) * nthreads))) {
+       printf("Erro ao alocar dados da thread...\n");
+       exit(EXIT_FAILURE);
+    }
+
+    if (!(threads = (pthread_t *) malloc(sizeof(pthread_t) * nthreads))) {
+        printf("Erro ao alocar as threads...\n");
+               exit(EXIT_FAILURE);
+    }
+
+    int nrows = A->rows;
+    int ncols = A->cols;
+    int i;
+
+    matrix_t *C = matrix_cpy(A);
+
+    long long int x = nrows * ncols / nthreads;
+    for (i = 0; i < nthreads; i++) {
+       dt[i].id = i;
+       dt[i].l_i = x*i;
+       dt[i].l_f = x*i + x - 1;
+
+       dt[i].A = A;
+       dt[i].vet = &C->data[0][x*i];
+       dt[i].vet_size = x;
+       pthread_create(&threads[i], NULL, mergesort_thread, (void *) (dt + i));
+    }
+
+    dt[i-1].vet_size = (nrows * ncols) - dt[i-1].l_i + 1;
+
+
+    for (i = 0; i < nthreads; i++) {
+        pthread_join(threads[i], NULL);
+    }
+
+    C = coisa_merge(dt, nthreads, nrows, ncols);
+
+
+    printf("\nC:\n");
+    matrix_print(C);
+
+    free(dt);
+    free(threads);
+
+    return C;
+}
+
+matrix_t *coisa_merge(DadosThread *dt, int nthreads, int rows, int cols){
+    matrix_t *A = matrix_create(rows, cols);
+    int i, j, k;
+    k = 0;
+    for(i = 0; i < nthreads; i++){
+        for(j = 0; j < dt[i].vet_size; j++){
+            A->data[0][k] = dt[i].vet[j];
+            k++;
+        }
+    }
+    return A;
+}
+
+void *mergesort_thread(void *arg){
+    DadosThread *p = (DadosThread *) arg;
+
+    int size, l_start;
+    int n = p->vet_size;
+
+    for(size = 1; size < n; size *= 2){
+        for(l_start = 0; l_start < n - 1; l_start += 2*size){
+            int mid = l_start + size - 1;
+            int r_end = min(l_start + 2*size - 1, n-1);
+
+            merge(p->vet, l_start, mid, r_end);
+        }
+    }
+
+  return NULL;
+}
+
+
+matrix_t *mergesort(matrix_t *A){
+    int size, l_start;
+    int n = A->rows * A->cols;
+
+    matrix_t *C = matrix_cpy(A);
+
+    for(size = 1; size < n; size *= 2){
+        for(l_start = 0; l_start < n-1; l_start += 2*size){
+            int mid = l_start + size - 1;
+            int r_end = min(l_start + 2*size - 1, n-1);
+
+            merge(C->data[0], l_start, mid, r_end);
+        }
+    }
+    return C;
+}
+
+void merge(double *vet, int l, int m, int r){
+    int i, j, k;
+    int n1 = m - l + 1;
+    int n2 =  r - m;
+
+    /* create temp arrays */
+    double L[n1], R[n2];
+
+    /* Copy data to temp arrays L[] and R[] */
+    for (i = 0; i < n1; i++)
+        L[i] = vet[l + i];
+    for (j = 0; j < n2; j++)
+        R[j] = vet[m + 1+ j];
+
+    /* Merge the temp arrays back into vet[l..r]*/
+    i = 0;
+    j = 0;
+    k = l;
+    while (i < n1 && j < n2)
+    {
+        if (L[i] <= R[j])
+        {
+            vet[k] = L[i];
+            i++;
+        }
+        else
+        {
+            vet[k] = R[j];
+            j++;
+        }
+        k++;
+    }
+
+    /* Copy the remaining elements of L[], if there are any */
+    while (i < n1)
+    {
+        vet[k] = L[i];
+        i++;
+        k++;
+    }
+
+    /* Copy the remaining elements of R[], if there are any */
+    while (j < n2)
+    {
+        vet[k] = R[j];
+        j++;
+        k++;
+    }
+}
+
+// matrix_t *matrix_sort_parallel(matrix_t *A){
+//
+     // DadosThread *dt = NULL;
+//      pthread_t *threads = NULL;
+//
+//      if (!(dt = (DadosThread *) malloc(sizeof(DadosThread) * nthreads))) {
+//         printf("Erro ao alocar dados da thread...\n");
+//         exit(EXIT_FAILURE);
+//      }
+//
+//      if (!(threads = (pthread_t *) malloc(sizeof(pthread_t) * nthreads))) {
+//          printf("Erro ao alocar as threads...\n");
+//                 exit(EXIT_FAILURE);
+//      }
+//
+//      int nrows = A->rows;
+//      int ncols = A->cols;
+//      int i;
+//      long long int x;
+//
+//      matrix_t *C = matrix_create(nrows, ncols);
+//
+//      if(nthreads > nrows){ //Não é possível dividir entre todas a threads
+//          nthreads = nrows;
+//          for (i = 0; i < nthreads; i++) {
+//              dt[i].id = i;
+//              dt[i].l_i = i;
+//              dt[i].l_f = i;
+//
+//              dt[i].A = A;
+//              dt[i].B = B;
+//              dt[i].C = C;
+//              pthread_create(&threads[i], NULL, multiply_thread, (void *) (dt + i));
+//          }
+//      }
+//      else{
+//          x = nrows / nthreads;
+//          for (i = 0; i < nthreads-1; i++) {
+//              dt[i].id = i;
+//              dt[i].l_i = x*i;
+//              dt[i].l_f = x*i + x - 1;
+//
+//              dt[i].A = A;
+//              dt[i].B = B;
+//              dt[i].C = C;
+//              pthread_create(&threads[i], NULL, multiply_thread, (void *) (dt + i));
+//          }
+//          dt[i].id = i;
+//          dt[i].l_i = x*i;
+//          dt[i].l_f = nrows - 1;
+//
+//          dt[i].A = A;
+//          dt[i].B = B;
+//          dt[i].C = C;
+//          pthread_create(&threads[i], NULL, multiply_thread, (void *) (dt + i));
+//      }
+//
+//      for (i = 0; i < nthreads; i++) {
+//          pthread_join(threads[i], NULL);
+//      }
+//
+//      free(dt);
+//      free(threads);
+//
+//      return C;
+// }

@@ -61,7 +61,8 @@ int main(int argc, char **argv)
 
 
    matrix_destroy(A);
-   matrix_destroy(B);
+   
+   // matrix_destroy(B);
    matrix_destroy(C);
 
    //Do something

@@ -30,6 +30,13 @@ typedef struct {
 	int l_f;
 } DadosThread;
 
+typedef struct{
+	matrix_t *mat;
+    int left, right;
+    int cont, nthreads;
+}sort_info;
+
+
 /*
  * All functions must return a new matriz (when needed)
  */
@@ -61,7 +68,7 @@ matrix_t *mergesort_parallel(matrix_t* A, int nthreads);
 void *mergesort_thread(void *arg);
 matrix_t *coisa_merge(DadosThread *dt, int nthreads, int rows, int cols);
 
-matrix_t *mergesort(matrix_t *A);
+void *mergesort(void *data);
 void merge(double *vet, int l, int m, int r);
 
 void matrix_print(matrix_t *m);

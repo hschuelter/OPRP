@@ -39,10 +39,14 @@ int main(int argc, char **argv)
    start_time = wtime();
 
 
+   sort_info *data = (sort_info*) malloc(sizeof(sort_info));
+   data->mat = A;
+   data->left  = 0;
+   data->right = nrows * ncols - 1;
+   data->cont = 0;
+   data->nthreads = nthreads;
 
-
-   matrix_t *C = mergesort_parallel(A, nthreads);
-
+   matrix_t *C = mergesort((void*) data);
    // C = matrix_multiply(A,B);
 
    // C = matrix_sort(C);
@@ -50,8 +54,8 @@ int main(int argc, char **argv)
    end_time = wtime();
 
 
-   printf("\nA:\n");
-   matrix_print(A);
+   // printf("\nA:\n");
+   // matrix_print(A);
 
    // printf("\nB:\n");
    // matrix_print(B);

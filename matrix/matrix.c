@@ -332,16 +332,16 @@ matrix_t *mergesort_parallel(matrix_t* A, int nthreads){
 
 	// for(i = 0; i < nthreads; i++){
 	// 	if(pthread_mutex_init(&mutexes[i], NULL) != 0){
-	// 		printf("Erro na inicialização de mutex\n");
+	// 		printf("Erro na inicialização de mvoid*) datautex\n");
 	// 		exit(EXIT_FAILURE);
 	// 	}
     // }
 
-	// //Guardar o inicio e fim de vetor de cada thread e que isso seja visível para as outras
-    // int** manip_atual = (int**) malloc(sizeof(int*)*nthreads);
-    // for(i = 0; i < nthreads; i++){
-    // 	manip_atual[i] = (int*) malloc(sizeof(int)*2);
-    // }
+	//Guardar o inicio e fim de vetor de cada thread e que isso seja visível para as outras
+    int** manip_atual = (int**) malloc(sizeof(int*)*nthreads);
+    for(i = 0; i < nthreads; i++){
+    	manip_atual[i] = (int*) malloc(sizeof(int)*2);
+    }
 
 
     int nrows = A->rows;
@@ -360,30 +360,31 @@ matrix_t *mergesort_parallel(matrix_t* A, int nthreads){
        dt[i].vet = &C->data[0][x*i];
        dt[i].vet_size = x;
 
-    //    dt[i].nthreads = nthreads;
+       dt[i].nthreads = nthreads;
+       dt[i].threads = threads;
     //    dt[i].mutexes = mutexes;
-    //    dt[i].manip_atual = manip_atual;
+       dt[i].manip_atual = manip_atual;
 
        //Talvez dê pra tirar l_i e l_f, mas talvez sejam uteis para as outras funções
-    //    dt[i].manip_atual[i][0] = dt[i].l_i;
-    //    dt[i].manip_atual[i][1] = dt[i].l_f;
+       dt[i].manip_atual[i][0] = dt[i].l_i;
+       dt[i].manip_atual[i][1] = dt[i].l_f;
 
        pthread_create(&threads[i], NULL, mergesort_thread, (void *) (dt + i));
     }
 
     dt[i-1].l_f = nrows*ncols - 1;
-   	// dt[i-1].manip_atual[i-1][1] = dt[i-1].l_f;
+   	dt[i-1].manip_atual[i-1][1] = dt[i-1].l_f;
    	// printf("oi: %d\n", dt[i-1].l_f);
 
     dt[i-1].vet_size = (nrows * ncols) - dt[i-1].l_i + 1;
 
-	    for (i = 0; i < nthreads; i++) {
-        if(pthread_join(threads[i], NULL) != 0){
-        	printf("Erro de join da thread %d", i);
-        	exit(EXIT_FAILURE);
-        }
+	    // for (i = 0; i < nthreads; i++) {
+      //   if(pthread_join(threads[i], NULL) != 0){
+      //   	printf("Erro de join da thread %d", i);
+      //   	exit(EXIT_FAILURE);
+      //   }
+    pthread_join(threads[0], NULL);
         // printf("%d saiu com sucesso\n", i);
-    }
 
 
     // C = coisa_merge(dt, nthreads, nrows, ncols);
@@ -396,16 +397,17 @@ matrix_t *mergesort_parallel(matrix_t* A, int nthreads){
     // 	pthread_mutex_destroy(&mutexes[i]);
     // }
 
-    // for(i = 0; i < nthreads; i++){
-    // 	free(manip_atual[i]);
-    // }
-    // free(manip_atual);
+    for(i = 0; i < nthreads; i++){
+    	free(manip_atual[i]);
+    }
+    free(manip_atual);
 
     free(dt);
     free(threads);
 
     return C;
-}
+  }
+
 
 matrix_t *coisa_merge(DadosThread *dt, int nthreads, int rows, int cols){
     matrix_t *A = matrix_create(rows, cols);
@@ -425,7 +427,7 @@ void *mergesort_thread(void *arg){
     DadosThread *p = (DadosThread *) arg;
 
 
-    pthread_mutex_lock(&p->mutexes[p->id]);
+    // pthread_mutex_lock(&p->mutexes[p->id]);
 
 
     int size, l_start;
@@ -442,16 +444,15 @@ void *mergesort_thread(void *arg){
     }
 
 
-
     int active_id = p->id; //id relativo às threads ativas
     int combined_threads = 1;
     long long int x = p->C->rows * p->C->cols / p->nthreads;
     //Número de threads é ímpar
     if(p->nthreads % 2 != 0){
     	if(p->id == p->nthreads - 1){
-			printf("Sai:%d\n", p->id);
+			     printf("Sai:%d\n", p->id);
 
-			pthread_mutex_unlock(&p->mutexes[p->id]);
+			// pthread_mutex_unlock(&p->mutexes[p->id]);
     		return NULL;
     	}
 
@@ -464,25 +465,26 @@ void *mergesort_thread(void *arg){
 	    	//Essa thread tem um id ativo par -> ela vai assumir o 'load' da seguinte
 	    	if(active_id % 2 == 0){
 
-	    		
+
 	    		if(p->id + combined_threads < p->nthreads-1){
 					// printf("%d Tentando entrar: %d\n", p->id, combined_threads);
-	    			pthread_mutex_lock(&p->mutexes[p->id + combined_threads]);
+          pthread_join(p->threads[p->id + combined_threads], NULL);
+            // pthread_mutex_lock(&p->mutexes[p->id + combined_threads]);
 					// printf("Consegui entrar:%d + %d\n", p->id, combined_threads);
-					// printf("%d Inicio: %d   Meio: %d    Fim: %d\n", p->id, 
-	    				// p->manip_atual[p->id][0], 
-	    				// p->manip_atual[p->id][1], 
+					// printf("%d Inicio: %d   Meio: %d    Fim: %d\n", p->id,
+	    				// p->manip_atual[p->id][0],
+	    				// p->manip_atual[p->id][1],
 	    				// p->manip_atual[p->id + combined_threads][1]);
 
 
-	    			merge(&p->C->data[0][0], 
-	    				p->manip_atual[p->id][0], 
-	    				p->manip_atual[p->id][1], 
+	    			merge(&p->C->data[0][0],
+	    				p->manip_atual[p->id][0],
+	    				p->manip_atual[p->id][1],
 	    				p->manip_atual[p->id + combined_threads][1]);
-	    			
+
 	    			p->manip_atual[p->id][1] = p->manip_atual[p->id + combined_threads][1];
 
-	    			pthread_mutex_unlock(&p->mutexes[p->id + combined_threads]);
+	    			// pthread_mutex_unlock(&p->mutexes[p->id + combined_threads]);
 	    			combined_threads *= 2;
 	    		}
 	    		active_id /= 2;
@@ -491,34 +493,33 @@ void *mergesort_thread(void *arg){
 	    	else{
 				// printf("Sai:%d\n", p->id);
 
-	    		pthread_mutex_unlock(&p->mutexes[p->id]);
+	    		// pthread_mutex_unlock(&p->mutexes[p->id]);
 	    		return NULL;
 	    	}
    	 	}
 
 	    //Juntar a thread 0 com a thread sozinha
-		pthread_mutex_lock(&p->mutexes[p->id + p->nthreads - 1]);
+		// pthread_mutex_lock(&p->mutexes[p->id + p->nthreads - 1]);
+    pthread_join(p->threads[p->id + p->nthreads - 1], NULL);
+
 		// printf("Consegui entrar:%d + %d\n", p->id, p->nthreads-1);
-			// printf("%d Inicio: %d   Meio: %d    Fim: %d\n", p->id, 
-			// p->manip_atual[p->id][0], 
-			// p->manip_atual[p->id][1], 
+			// printf("%d Inicio: %d   Meio: %d    Fim: %d\n", p->id,
+			// p->manip_atual[p->id][0],
+			// p->manip_atual[p->id][1],
 			// p->manip_atual[p->id + p->nthreads-1][1]);
 
 
-		merge(&p->C->data[0][0], 
-			p->manip_atual[p->id][0], 
-			p->manip_atual[p->id][1], 
+		merge(&p->C->data[0][0],
+			p->manip_atual[p->id][0],
+			p->manip_atual[p->id][1],
 			p->manip_atual[p->id + p->nthreads-1][1]);
-		
-		pthread_mutex_unlock(&p->mutexes[p->id + p->nthreads - 1]);
-		pthread_mutex_unlock(&p->mutexes[p->id]);
-	}
 
-       // dt[i].l_i = x*i;
-       // dt[i].l_f = x*i + x - 1;
-    else{
-    	int aux = last_two_multiple(p->nthreads);
-    	//Todas as threads foram combinadas    	
+		// pthread_mutex_unlock(&p->mutexes[p->id + p->nthreads - 1]);
+		// pthread_mutex_unlock(&p->mutexes[p->id]);
+	}
+  else{ //p->nthreads % 2 == 0
+    	// int aux = last_two_multiple(p->nthreads);
+    	//Todas as threads foram combinadas
     	while(combined_threads < p->nthreads){
 
     		// printf("%d  %d\n", p->id, active_id);
@@ -527,25 +528,26 @@ void *mergesort_thread(void *arg){
 	    	//Essa thread tem um id ativo par -> ela vai assumir o 'load' da seguinte
 	    	if(active_id % 2 == 0){
 
-	    		
+
 	    		if(p->id + combined_threads < p->nthreads){
-					// printf("%d Tentando entrar: %d\n", p->id, combined_threads);
-	    			pthread_mutex_lock(&p->mutexes[p->id + combined_threads]);
-					// printf("Consegui entrar:%d + %d\n", p->id, combined_threads);
-					// printf("%d Inicio: %d   Meio: %d    Fim: %d\n", p->id, 
-	    				// p->manip_atual[p->id][0], 
-	    				// p->manip_atual[p->id][1], 
+					printf("%d Tentando entrar: %d\n", p->id, combined_threads);
+	    			// pthread_mutex_lock(&p->mutexes[p->id + combined_threads]);
+                    pthread_join(p->threads[p->id + combined_threads], NULL);
+					printf("Consegui entrar:%d + %d\n", p->id, combined_threads);
+					// printf("%d Inicio: %d   Meio: %d    Fim: %d\n", p->id,
+	    				// p->manip_atual[p->id][0],
+	    				// p->manip_atual[p->id][1],
 	    				// p->manip_atual[p->id + combined_threads][1]);
 
 
-	    			merge(&p->C->data[0][0], 
-	    				p->manip_atual[p->id][0], 
-	    				p->manip_atual[p->id][1], 
+	    			merge(&p->C->data[0][0],
+	    				p->manip_atual[p->id][0],
+	    				p->manip_atual[p->id][1],
 	    				p->manip_atual[p->id + combined_threads][1]);
-	    			
+
 	    			p->manip_atual[p->id][1] = p->manip_atual[p->id + combined_threads][1];
 
-	    			pthread_mutex_unlock(&p->mutexes[p->id + combined_threads]);
+	    			// pthread_mutex_unlock(&p->mutexes[p->id + combined_threads]);
 	    			combined_threads *= 2;
 
 	    		}
@@ -560,14 +562,14 @@ void *mergesort_thread(void *arg){
 	    		active_id /= 2;
 	    	}
 	    	else{
-				// printf("Sai:%d\n", p->id);
+				printf("Sai:%d\n", p->id);
 
-	    		pthread_mutex_unlock(&p->mutexes[p->id]);
-	    		return NULL;
+	    		// pthread_mutex_unlock(&p->mutexes[p->id]);
+	    		pthread_exit(NULL);
 	    	}
 	    }
 	    // if(p->id == 0)
-	    pthread_mutex_unlock(&p->mutexes[p->id]);	    
+	    // pthread_mutex_unlock(&p->mutexes[p->id]);
 
     }
 
@@ -586,64 +588,64 @@ int last_two_multiple(int n){
 
 
 
-void *mergesort(void *data){
-    sort_info* d = (sort_info*) data;
-    int size, l_start;
-    // int n = A->rows * A->cols;
-
-    int left, right;
-    left = d->left;
-    right = d->right;
-
-
-
-    if(left < right){
-        int mid = d->left + (right - left) / 2;
-
-        if(pow(2, d->cont+1) < d->nthreads){
-
-            d->right = mid;
-            d->cont = d->cont+1;
-            mergesort(d);
-
-            pthread_t *thread = NULL;
-
-            if (!(thread = (pthread_t *) malloc(sizeof(pthread_t)))) {
-                printf("Erro ao alocar as threads...\n");
-                exit(EXIT_FAILURE);
-            }
-
-            sort_info* d_new = (sort_info*) malloc(sizeof(sort_info));
-            d_new->mat = d->mat;
-            d_new->left = mid+1;
-            d_new->right = right;
-            d_new->cont = d->cont;
-            d_new->nthreads = d->nthreads;
-            pthread_create(thread, NULL, mergesort, (void *) (d_new));
-        }
-
-        else{
-            d->right = mid;
-            d->cont = d->cont+1;
-            mergesort(d);
-
-            d->left = mid+1;
-            d->right = right;
-            mergesort(d);
-        }
-
-        merge(d->mat->data[0], left, mid, right);
-    }
-
-
-    // for(size = 1; size < n; size *= 2){
-    //     for(l_start = 0; l_start < n-1; l_start += 2*size){
-    //         int r_end = min(l_start + 2*size - 1, n-1);
-
-    //         merge(C->data[0], l_start, mid, r_end);
-    //     }
-    // }
-}
+// void *mergesort(void *data){
+//     sort_info* d = (sort_info*) data;
+//     int size, l_start;
+//     // int n = A->rows * A->cols;
+//
+//     int left, right;
+//     left = d->left;
+//     right = d->right;
+//
+//
+//
+//     if(left < right){
+//         int mid = d->left + (right - left) / 2;
+//
+//         if(pow(2, d->cont+1) < d->nthreads){
+//
+//             d->right = mid;
+//             d->cont = d->cont+1;
+//             mergesort(d);
+//
+//             pthread_t *thread = NULL;
+//
+//             if (!(thread = (pthread_t *) malloc(sizeof(pthread_t)))) {
+//                 printf("Erro ao alocar as threads...\n");
+//                 exit(EXIT_FAILURE);
+//             }
+//
+//             sort_info* d_new = (sort_info*) malloc(sizeof(sort_info));
+//             d_new->mat = d->mat;
+//             d_new->left = mid+1;
+//             d_new->right = right;
+//             d_new->cont = d->cont;
+//             d_new->nthreads = d->nthreads;
+//             pthread_create(thread, NULL, mergesort, (void *) (d_new));
+//         }
+//
+//         else{
+//             d->right = mid;
+//             d->cont = d->cont+1;
+//             mergesort(d);
+//
+//             d->left = mid+1;
+//             d->right = right;
+//             mergesort(d);
+//         }
+//
+//         merge(d->mat->data[0], left, mid, right);
+//     }
+//
+//
+//     // for(size = 1; size < n; size *= 2){
+//     //     for(l_start = 0; l_start < n-1; l_start += 2*size){
+//     //         int r_end = min(l_start + 2*size - 1, n-1);
+//
+//     //         merge(C->data[0], l_start, mid, r_end);
+//     //     }
+//     // }
+// }
 
 void merge(double *vet, int l, int m, int r){
     int i, j, k;
@@ -656,7 +658,7 @@ void merge(double *vet, int l, int m, int r){
     /* Copy data to temp arrays L[] and R[] */
     for (i = 0; i < n1; i++)
         L[i] = vet[l + i];
-    
+
     for (j = 0; j < n2; j++)
         R[j] = vet[m + 1+ j];
 

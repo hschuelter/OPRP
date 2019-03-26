@@ -1,7 +1,7 @@
 # GNU Makefile
 
 CC = gcc
-CCFLAGS = 
+CCFLAGS =
 LDFLAGS = -pthread
 TARGET = main
 

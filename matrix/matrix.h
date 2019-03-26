@@ -22,10 +22,10 @@ typedef struct {
     int vet_size;
 
     int nthreads;
-    pthread_mutex_t* mutexes;
+    pthread_t *threads;
 
     int** manip_atual;
-    
+
 	int l_i;
 	int l_f;
 } DadosThread;

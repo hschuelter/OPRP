@@ -15,19 +15,20 @@ double wtime()
 int main(int argc, char **argv)
 {
     double start_time, end_time;
-    int nrows, ncols, nthreads;
+    int nrows, ncols, nthreads, exec;
 
     matrix_t *m;
     matrix_t *A,*B;
 
-   if ((argc != 4)) {
-      printf("Uso: %s <rows> <cols> <numero de threads>\n", argv[0]);
+   if ((argc != 5)) {
+      printf("Uso: %s <rows> <cols> <numero de threads> <tipo de execucao>\n", argv[0]);
       exit(EXIT_FAILURE);
    }
 
    nrows = atoi(argv[1]);
    ncols = atoi(argv[2]);
    nthreads = atoi(argv[3]);
+   exec = stoi(argv[4]);
 
 
    A = matrix_create(nrows, ncols);
@@ -35,6 +36,26 @@ int main(int argc, char **argv)
 
    B = matrix_create(nrows, ncols);
    matrix_randfill(B);
+
+   switch(exec){
+       // SOMA
+       case 0:
+            matrix_t *C = matrix_sum_parallel(A, B, nthreads);
+
+            break;
+
+       // MULT
+       case 1:
+            matrix_t *C = matrix_multiply_parallel(A, B, nthreads);
+
+            break;
+
+       // SORT
+       case 2:
+            matrix_t *C = mergesort_parallel(A, B, nthreads);
+            break;
+
+   }
 
    start_time = wtime();
 
@@ -46,7 +67,6 @@ int main(int argc, char **argv)
    data->cont = 0;
    data->nthreads = nthreads;
 
-   matrix_t *C = mergesort((void*) data);
    // C = matrix_multiply(A,B);
 
    // C = matrix_sort(C);
@@ -54,18 +74,18 @@ int main(int argc, char **argv)
    end_time = wtime();
 
 
-   // printf("\nA:\n");
-   // matrix_print(A);
+   printf("\nA:\n");
+   matrix_print(A);
 
-   // printf("\nB:\n");
-   // matrix_print(B);
+   printf("\nB:\n");
+   matrix_print(B);
 
    printf("\nC:\n");
    matrix_print(C);
 
 
    matrix_destroy(A);
-   
+
    // matrix_destroy(B);
    matrix_destroy(C);
 

@@ -59,6 +59,9 @@ matrix_t *coisa_merge(DadosThread *dt, int nthreads, int rows, int cols);
 
 void *mergesort(void *data);
 
+
+matrix_t* matrix_sort_serial(matrix_t* mat);
+
 void mergeSort(matrix_t *mat, int l, int r);
 void merge(double *vet, int l, int m, int r);
 

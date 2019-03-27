@@ -51,8 +51,6 @@ matrix_t *matrix_sum_serial(matrix_t *A, matrix_t *B);
 matrix_t *matrix_sum_parallel(matrix_t *A, matrix_t *B, int nthreads);
 void *sum_thread(void *arg);
 
-matrix_t *matrix_sort_serial(matrix_t *A);
-
 matrix_t *mergesort_parallel(matrix_t* A, int nthreads);
 void *mergesort_thread(void *arg);
 matrix_t *coisa_merge(DadosThread *dt, int nthreads, int rows, int cols);

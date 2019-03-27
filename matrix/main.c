@@ -32,22 +32,22 @@ int main(int argc, char **argv){
     m1 = matrix_create(nrows, ncols);
     matrix_randfill(m1);
 
-    printf("\nm1:\n");
-    matrix_print(m1);
-
-    // m2 = matrix_create(nrows, ncols);
-    // matrix_randfill(m2);
 
     start_time = wtime();
-    mergeSort(m1, 0, (nrows * ncols) - 1);
+    m2 = matrix_sort_serial(m1);
     // C = matrix_sort(C);
 
     end_time = wtime();
 
+
     printf("\nm1:\n");
     matrix_print(m1);
+
+    printf("\nm2:\n");
+    matrix_print(m2);
     
     matrix_destroy(m1);
+    matrix_destroy(m2);
 
     printf("\n%d %d %f\n", nrows, ncols, end_time - start_time);
     fflush(stdout);

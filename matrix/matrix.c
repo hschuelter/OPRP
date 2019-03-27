@@ -621,7 +621,11 @@ int last_two_multiple(int n){
 
 
 matrix_t* matrix_sort_serial(matrix_t* mat){
-    
+    matrix_t* m1 = matrix_cpy(mat);
+
+    mergeSort(m1, 0, (m1->rows * m1->cols) - 1);
+
+    return m1;
 }
 
 void mergeSort(matrix_t* mat, int l, int r){ 

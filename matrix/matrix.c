@@ -9,8 +9,7 @@
 #include "matrix.h"
 #include <math.h>
 
-matrix_t *matrix_create(int rows, int cols)
-{
+matrix_t *matrix_create(int rows, int cols){
     matrix_t *m = NULL;
     int i;
 
@@ -31,16 +30,14 @@ matrix_t *matrix_create(int rows, int cols)
     return m;
 }
 
-void matrix_destroy(matrix_t *m)
-{
+void matrix_destroy(matrix_t *m){
     free(m->data);
     free(m);
 
     return;
 }
 
-void matrix_randfill(matrix_t *m)
-{
+void matrix_randfill(matrix_t *m){
    int i, j;
    for (i = 0; i < m->rows; i++) {
       for (j = 0; j < m->cols; j++) {
@@ -49,8 +46,7 @@ void matrix_randfill(matrix_t *m)
    }
 }
 
-void matrix_fill(matrix_t *m, double val)
-{
+void matrix_fill(matrix_t *m, double val){
    int i, j;
    for (i = 0; i < m->rows; i++) {
       for (j = 0; j < m->cols; j++) {
@@ -59,11 +55,11 @@ void matrix_fill(matrix_t *m, double val)
    }
 }
 
-matrix_t *matrix_multiply(matrix_t *A, matrix_t *B)
-{
+matrix_t *matrix_multiply_serial(matrix_t *A, matrix_t *B){
     //Não podemos multiplicar
     if(A->cols != B->rows){
         printf("Impossível multiplicar\n");
+        printf("m1: %d | m2: %d\n", A->cols, B->rows);
         return NULL;
     }
 
@@ -82,7 +78,6 @@ matrix_t *matrix_multiply(matrix_t *A, matrix_t *B)
 
     return C;
 }
-
 
 //Cada thread é responsável por um determinado número de linhas da matriz C
 matrix_t *matrix_multiply_parallel(matrix_t *A, matrix_t *B, int nthreads){
@@ -175,9 +170,7 @@ void *multiply_thread(void *arg){
     return NULL;
 }
 
-
-void matrix_print(matrix_t *m)
-{
+void matrix_print(matrix_t *m){
 
    int i, j;
    for (i = 0; i < m->rows; i++) {
@@ -189,8 +182,7 @@ void matrix_print(matrix_t *m)
    fflush(stdout);
 }
 
-matrix_t *matrix_sum(matrix_t *A, matrix_t *B)
-{
+matrix_t *matrix_sum_serial(matrix_t *A, matrix_t *B){
     //Não podemos somar
     if( (A->rows != B->rows) && (A->cols != B->cols) ){
         printf("Impossível somar\n");
@@ -286,26 +278,7 @@ matrix_t *matrix_cpy(matrix_t *A){
     return C;
 }
 
-matrix_t *matrix_sort(matrix_t *A)
-{
-    int i,j;
-    double valor;
-    matrix_t *C = matrix_cpy(A);
-
-    for(i = 0; i < A->rows * A->cols; i++){
-        for(j = i; j < A->rows * A->cols; j++){
-            if(C->data[0][j] < C->data[0][i]){
-                valor = C->data[0][i];
-                C->data[0][i] = C->data[0][j];
-                C->data[0][j] = valor;
-            }
-        }
-    }
-
-    return C;
-}
-
-int min(int x, int y) { return (x<y)? x :y; }
+int min(int x, int y) { return (x<y)? x : y; }
 
 matrix_t *mergesort_parallel(matrix_t* A, int nthreads){
     int i;
@@ -406,8 +379,7 @@ matrix_t *mergesort_parallel(matrix_t* A, int nthreads){
     free(threads);
 
     return C;
-  }
-
+}
 
 matrix_t *coisa_merge(DadosThread *dt, int nthreads, int rows, int cols){
     matrix_t *A = matrix_create(rows, cols);
@@ -647,6 +619,23 @@ int last_two_multiple(int n){
 //     // }
 // }
 
+
+matrix_t* matrix_sort_serial(matrix_t* mat){
+    
+}
+
+void mergeSort(matrix_t* mat, int l, int r){ 
+    if (l < r) { 
+        int m = l+(r-l)/2; 
+  
+        // Sort first and second halves 
+        mergeSort(mat, l, m); 
+        mergeSort(mat, m+1, r); 
+  
+        merge(mat->data[0], l, m, r); 
+    }
+} 
+
 void merge(double *vet, int l, int m, int r){
     int i, j, k;
     int n1 = m - l + 1;
@@ -700,7 +689,7 @@ void merge(double *vet, int l, int m, int r){
 
 // matrix_t *matrix_sort_parallel(matrix_t *A){
 //
-     // DadosThread *dt = NULL;
+// DadosThread *dt = NULL;
 //      pthread_t *threads = NULL;
 //
 //      if (!(dt = (DadosThread *) malloc(sizeof(DadosThread) * nthreads))) {

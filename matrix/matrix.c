@@ -621,8 +621,69 @@ int last_two_multiple(int n){
 
 
 matrix_t* matrix_sort_serial(matrix_t* mat){
-    
+    matrix_t* m;
+    int rows, cols;
+    m = matrix_cpy(mat);
+    rows = m->rows;
+    cols = m->cols;
+
+    mergeSort(m, 0, rows * cols - 1);
+    return m;
 }
+
+matrix_t* matrix_sort_parallel(matrix_t* mat, int nthreads){
+
+    DadosThread *dt = NULL;
+    pthread_t *threads = NULL;
+
+    if (!(dt = (DadosThread *) malloc(sizeof(DadosThread) * nthreads))) {
+        printf("Erro ao alocar dados da thread...\n");
+        exit(EXIT_FAILURE);
+    }
+
+    if (!(threads = (pthread_t *) malloc(sizeof(pthread_t) * nthreads))) {
+        printf("Erro ao alocar as threads...\n");
+        exit(EXIT_FAILURE);
+    }
+
+    int rows = mat->rows;
+    int cols = mat->cols;
+    int i;
+    long long int x = nthreads / rows;
+
+    for(i = 0; i < nthreads - 1; i++){
+        dt[i].id = i;
+        dt[i].l_i = x*i;
+        dt[i].l_f = x*i + x - 1;
+        dt[i].A = mat;
+        pthread_create(&threads[i], NULL, sort_thread, (void*) (dt + i));
+    }
+    dt[i].id = i;
+    dt[i].l_i = x*i;
+    dt[i].l_f = (rows * cols) - 1;
+    dt[i].A = mat;
+    pthread_create(&threads[i], NULL, sort_thread, (void*) (dt + i));
+
+
+    for (i = 0; i < nthreads; i++) {
+        pthread_join(threads[i], NULL);
+    }
+
+    free(dt);
+    free(threads);
+
+    return mat;
+
+}
+
+void* sort_thread(void* arg){
+    DadosThread *data = (DadosThread *) arg;
+
+    mergeSort(data->A, data->l_i, data->l_f);
+
+    return NULL;
+}
+
 
 void mergeSort(matrix_t* mat, int l, int r){ 
     if (l < r) { 

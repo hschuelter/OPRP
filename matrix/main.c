@@ -44,6 +44,7 @@ int main(int argc, char **argv){
     // matrix_print(m1);
     
     matrix_destroy(m1);
+    matrix_destroy(m2);
 
     printf("\n%d %d %f\n", nrows, ncols, end_time - start_time);
     fflush(stdout);

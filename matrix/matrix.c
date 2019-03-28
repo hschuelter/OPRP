@@ -189,17 +189,15 @@ matrix_t *matrix_sum_serial(matrix_t *A, matrix_t *B){
         return NULL;
     }
 
-    matrix_t *C = matrix_create(A->rows, A->cols);
-
     int i,j;
 
     for(i = 0; i < A->rows; i++){
         for(j = 0; j < A->cols; j++){
-            C->data[i][j] = A->data[i][j] + B->data[i][j];
+            A->data[i][j] += B->data[i][j];
         }
     }
 
-    return C;
+    return A;
 }
 
 matrix_t *matrix_sum_parallel(matrix_t *A, matrix_t *B, int nthreads){
@@ -220,8 +218,6 @@ matrix_t *matrix_sum_parallel(matrix_t *A, matrix_t *B, int nthreads){
     int ncols = A->cols;
     int i;
 
-    matrix_t *C = matrix_create(nrows, ncols);
-
     long long int x = nrows * ncols / nthreads;
     for (i = 0; i < nthreads-1; i++) {
        dt[i].id = i;
@@ -230,7 +226,6 @@ matrix_t *matrix_sum_parallel(matrix_t *A, matrix_t *B, int nthreads){
 
        dt[i].A = A;
        dt[i].B = B;
-       dt[i].C = C;
        pthread_create(&threads[i], NULL, sum_thread, (void *) (dt + i));
     }
     dt[i].id = i;
@@ -239,7 +234,6 @@ matrix_t *matrix_sum_parallel(matrix_t *A, matrix_t *B, int nthreads){
 
     dt[i].A = A;
     dt[i].B = B;
-    dt[i].C = C;
     pthread_create(&threads[i], NULL, sum_thread, (void *) (dt + i));
 
 
@@ -250,14 +244,14 @@ matrix_t *matrix_sum_parallel(matrix_t *A, matrix_t *B, int nthreads){
     free(dt);
     free(threads);
 
-    return C;
+    return A;
 }
 
 void *sum_thread(void *arg){
     DadosThread *p = (DadosThread *) arg;
     int i;
     for(i = p->l_i; i <= p->l_f; i++){
-        p->C->data[0][i] = p->A->data[0][i] + p->B->data[0][i];
+        p->A->data[0][i] += p->B->data[0][i];
     }
 
   // printf("Thread %d terminou\n", p->id);
@@ -623,6 +617,7 @@ int last_two_multiple(int n){
 matrix_t* matrix_sort_serial(matrix_t* mat){
     matrix_t* m;
     int rows, cols;
+
     m = matrix_cpy(mat);
     rows = m->rows;
     cols = m->cols;
@@ -664,7 +659,6 @@ matrix_t* matrix_sort_parallel(matrix_t* mat, int nthreads){
     dt[i].A = mat;
     pthread_create(&threads[i], NULL, sort_thread, (void*) (dt + i));
 
-
     for (i = 0; i < nthreads; i++) {
         pthread_join(threads[i], NULL);
     }
@@ -673,7 +667,6 @@ matrix_t* matrix_sort_parallel(matrix_t* mat, int nthreads){
     free(threads);
 
     return mat;
-
 }
 
 void* sort_thread(void* arg){
@@ -685,17 +678,17 @@ void* sort_thread(void* arg){
 }
 
 
-void mergeSort(matrix_t* mat, int l, int r){ 
-    if (l < r) { 
-        int m = l+(r-l)/2; 
-  
-        // Sort first and second halves 
-        mergeSort(mat, l, m); 
-        mergeSort(mat, m+1, r); 
-  
-        merge(mat->data[0], l, m, r); 
+void mergeSort(matrix_t* mat, int l, int r){
+    if (l < r) {
+        int m = l+(r-l)/2;
+
+        // Sort first and second halves
+        mergeSort(mat, l, m);
+        mergeSort(mat, m+1, r);
+
+        merge(mat->data[0], l, m, r);
     }
-} 
+}
 
 void merge(double *vet, int l, int m, int r){
     int i, j, k;

@@ -83,7 +83,6 @@ matrix_t *matrix_multiply_parallel(matrix_t *A, matrix_t *B, matrix_t *C, int nt
         exit(EXIT_FAILURE);
     }
 
-
     DadosThread *dt = NULL;
     pthread_t *threads = NULL;
 
@@ -94,7 +93,7 @@ matrix_t *matrix_multiply_parallel(matrix_t *A, matrix_t *B, matrix_t *C, int nt
 
     if (!(threads = (pthread_t *) malloc(sizeof(pthread_t) * nthreads))) {
         printf("Erro ao alocar as threads...\n");
-               exit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     int nrows = A->rows;

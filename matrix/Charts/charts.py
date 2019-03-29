@@ -13,9 +13,7 @@ def setup():
 
     sp = np.zeros((8,), dtype=float);
 
-
-
-    sum_info = open('sum.txt', 'r')
+    sum_info = open('mul.txt', 'r')
     sum_info = sum_info.read().split('\n')
     for i in range(0,9):
         sum_info.remove("");
@@ -52,6 +50,7 @@ def plot_chart(speedup):
     plt.plot(speedup, color='blue')
     plt.xlabel('Numero de cores')
     plt.ylabel('Speedup')
+    plt.title('Speedup da Multiplicacao')
 
     # fig, ax = plt.subplots(2,1)
     # fig, ax = plt.subplots(3,1)

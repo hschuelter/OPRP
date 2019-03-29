@@ -55,13 +55,15 @@ matrix_t *coisa_merge(DadosThread *dt, int nthreads, int rows, int cols);
 
 void *mergesort(void *data);
 
-matrix_t* matrix_sort_serial(matrix_t* mat);
+matrix_t* matrix_sort_serial(matrix_t* m);
 matrix_t* matrix_sort_parallel(matrix_t* mat, int nthreads);
 void* sort_thread(void* arg); 
 
-void mergeSort(matrix_t *mat, int l, int r);
+void recursive_merge_sort(matrix_t *mat, int l, int r);
+void iterative_merge_sort(matrix_t *mat, int size);
 void merge(double *vet, int l, int m, int r);
 
+void array_print(double* vet, int begin, int end);
 void matrix_print(matrix_t *m);
 
 int last_two_multiple(int n);

@@ -38,12 +38,12 @@ void matrix_destroy(matrix_t *m){
 }
 
 void matrix_randfill(matrix_t *m){
-   int i, j;
-   for (i = 0; i < m->rows; i++) {
-      for (j = 0; j < m->cols; j++) {
-         m->data[i][j] = random();
-      }
-   }
+    int i, j;
+    for (i = 0; i < m->rows; i++) {
+        for (j = 0; j < m->cols; j++) {
+            m->data[i][j] = random();
+        }
+    }
 }
 
 void matrix_fill(matrix_t *m, double val){
@@ -608,15 +608,12 @@ int last_two_multiple(int n){
 // }
 
 
-matrix_t* matrix_sort_serial(matrix_t* mat){
-    matrix_t* m;
+matrix_t* matrix_sort_serial(matrix_t* m){
     int rows, cols;
 
-    m = matrix_cpy(mat);
     rows = m->rows;
     cols = m->cols;
-
-    mergeSort(m, 0, rows * cols - 1);
+    iterative_merge_sort(m, rows * cols);
     return m;
 }
 
@@ -666,71 +663,104 @@ matrix_t* matrix_sort_parallel(matrix_t* mat, int nthreads){
 void* sort_thread(void* arg){
     DadosThread *data = (DadosThread *) arg;
 
-    mergeSort(data->A, data->l_i, data->l_f);
+    recursive_merge_sort(data->A, data->l_i, data->l_f);
 
     return NULL;
 }
 
 
-void mergeSort(matrix_t* mat, int l, int r){
+void recursive_merge_sort(matrix_t* mat, int l, int r){
     if (l < r) {
         int m = l+(r-l)/2;
 
         // Sort first and second halves
-        mergeSort(mat, l, m);
-        mergeSort(mat, m+1, r);
+        recursive_merge_sort(mat, l, m);
+        recursive_merge_sort(mat, m+1, r);
 
         merge(mat->data[0], l, m, r);
     }
 }
 
+void iterative_merge_sort(matrix_t *mat, int size){
+    int current; 
+    int left, mid, right; 
+  
+    for (current = 1; current <= size - 1; current = 2 * current){
+        for (left = 0; left < size - 1; left += 2 * current) {
+            right = min(left + 2*current - 1, size - 1); 
+            mid = left + current -1;   
+
+            // printf("%d | %d | %d\n", current, mid);
+            merge(mat->data[0], left, mid, right);
+        } 
+    }
+    merge(mat->data[0], 0, mid, right);
+}
+
+void array_print(double* vet, int begin, int end){
+    int i;
+    for(i = begin; i < end; i++){
+        printf("%.2f ", vet[i]);
+    }
+    printf("\n");
+}
 void merge(double *vet, int l, int m, int r){
-    int i, j, k;
+    long int i, j, k;
     int n1 = m - l + 1;
     int n2 =  r - m;
 
-    /* create temp arrays */
     double L[n1], R[n2];
-
-    /* Copy data to temp arrays L[] and R[] */
-    for (i = 0; i < n1; i++)
+    for (i = 0; i < n1; i++){
         L[i] = vet[l + i];
+    }
 
     for (j = 0; j < n2; j++)
-        R[j] = vet[m + 1+ j];
+        R[j] = vet[m + j + 1];
 
-    /* Merge the temp arrays back into vet[l..r]*/
+    // printf("L:\n");
+    // array_print(L, 0, n1);
+    // printf("R:\n");
+    // array_print(R, 0, n2);
+
+    // printf("Vet 1:\n");
+    // array_print(vet, l, r+1);
+
+
     i = 0;
     j = 0;
     k = l;
-    while (i < n1 && j < n2)
-    {
-        if (L[i] <= R[j])
-        {
+    while (i < n1 && j < n2){
+
+        if (L[i] <= R[j]) {
             vet[k] = L[i];
             i++;
         }
-        else
-        {
+        else {
             vet[k] = R[j];
             j++;
         }
         k++;
     }
 
-    /* Copy the remaining elements of L[], if there are any */
-    while (i < n1)
-    {
+    // printf("Crashou 1!\n");
+    // printf("l: %d | m: %d | r: %d\n", l, m, r);
+
+    while (i < n1) {
+        // printf("%d | %ld (max of %ld)\n", i, k, n1);
         vet[k] = L[i];
         i++;
         k++;
     }
+    // printf("Crashou 2!\n");
 
-    /* Copy the remaining elements of R[], if there are any */
-    while (j < n2)
-    {
+    while (j < n2) {
         vet[k] = R[j];
         j++;
         k++;
     }
+
+    // printf("Vet 2:\n");
+    // array_print(vet, l, r+1);
+
+    // printf("-------------------\n");
 }

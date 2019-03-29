@@ -17,7 +17,6 @@ int main(int argc, char **argv){
     int nrows, ncols, nthreads, exec;
 
     matrix_t *m1, *m2, *m3;
-    matrix_t *A,*B;
 
     if ((argc != 5)) {
         printf("Uso: %s <rows> <cols> <numero de threads> <tipo de execucao>\n", argv[0]);
@@ -38,7 +37,6 @@ int main(int argc, char **argv){
     m3 = matrix_create(m1->rows, m2->cols);
     matrix_fill(m3, 0.0);
 
-
     start_time = wtime();
 
     switch(exec){
@@ -57,6 +55,10 @@ int main(int argc, char **argv){
         case 3:
             m3 = matrix_multiply_parallel(m1, m2, m3, nthreads);
             break;
+        
+        case 4:
+            m1 = matrix_sort_serial(m1);
+            break;
     }
 
     end_time = wtime();
@@ -64,6 +66,7 @@ int main(int argc, char **argv){
 
     // printf("\nm1:\n");
     // matrix_print(m1);
+    // printf("Acabou\n");
     //
     // printf("\nm2:\n");
     // matrix_print(m2);

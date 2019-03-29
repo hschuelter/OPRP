@@ -35,6 +35,10 @@ int main(int argc, char **argv){
     m2 = matrix_create(nrows, ncols);
     matrix_randfill(m2);
 
+    m3 = matrix_create(m1->rows, m2->cols);
+    matrix_fill(m3, 0.0);
+
+
     start_time = wtime();
 
     switch(exec){
@@ -44,6 +48,14 @@ int main(int argc, char **argv){
 
         case 1:
             m3 = matrix_sum_parallel(m1, m2, nthreads);
+            break;
+
+        case 2:
+            m3 = matrix_multiply_serial(m1, m2, m3);
+            break;
+
+        case 3:
+            m3 = matrix_multiply_parallel(m1, m2, m3, nthreads);
             break;
     }
 

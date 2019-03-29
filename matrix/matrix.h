@@ -41,8 +41,8 @@ void matrix_destroy(matrix_t *m);
 void matrix_randfill(matrix_t *m);
 void matrix_fill(matrix_t *m, double val);
 
-matrix_t *matrix_multiply_serial(matrix_t *A, matrix_t *B);
-matrix_t *matrix_multiply_parallel(matrix_t *A, matrix_t *B, int nthreads);
+matrix_t *matrix_multiply_serial(matrix_t *A, matrix_t *B, matrix_t *C);
+matrix_t *matrix_multiply_parallel(matrix_t *A, matrix_t *B, matrix_t *C, int nthreads);
 void *multiply_thread(void *arg);
 
 matrix_t *matrix_sum_serial(matrix_t *A, matrix_t *B);

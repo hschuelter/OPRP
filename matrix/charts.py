@@ -36,12 +36,28 @@ def setup():
     return sp
 
 def plot_chart(speedup):
+    ideal = []
 
-    fig, ax = plt.subplots(1,1)
+    speedup = np.insert(speedup, 0, 0, axis=0)
+    print(speedup)
+
+
+    for i in range(0,9):
+        ideal.insert(i, i)
+
+    plt.ylim(1, 8)
+    plt.xlim(1, 8)
+
+    plt.plot(ideal, color='black')
+    plt.plot(speedup, color='blue')
+    plt.xlabel('Numero de cores')
+    plt.ylabel('Speedup')
+
+    # fig, ax = plt.subplots(2,1)
     # fig, ax = plt.subplots(3,1)
 
-    ax[0].plot(speedup, color='blue')
-    ax[0].grid(True)
+    # ax[0].plot(speedup, color='blue')
+    # ax[0].grid(True)
     # plt.set_xlabel('Iteração')
     # plt.set_ylabel('Cláusulas')
     # plt.set_title('Speedup')
@@ -58,10 +74,10 @@ def plot_chart(speedup):
     # ax[1].set_ylabel('Temperatura')
     # ax[1].set_title('Temperatura')
 
-    plt.tight_layout()
-    # plt.show()
+    # plt.tight_layout()
+    plt.show()
 
-    fig.savefig("chart.png")
+    # fig.savefig("chart.p'ng")
 
 def main():
 

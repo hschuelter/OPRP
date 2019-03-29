@@ -55,16 +55,13 @@ void matrix_fill(matrix_t *m, double val){
    }
 }
 
-matrix_t *matrix_multiply_serial(matrix_t *A, matrix_t *B){
+matrix_t *matrix_multiply_serial(matrix_t *A, matrix_t *B, matrix_t *C){
     //Não podemos multiplicar
     if(A->cols != B->rows){
         printf("Impossível multiplicar\n");
         printf("m1: %d | m2: %d\n", A->cols, B->rows);
         return NULL;
     }
-
-    matrix_t *C = matrix_create(A->rows, B->cols);
-    // matrix_fill(C, 0.0);
 
     int i,j,k;
 
@@ -80,7 +77,7 @@ matrix_t *matrix_multiply_serial(matrix_t *A, matrix_t *B){
 }
 
 //Cada thread é responsável por um determinado número de linhas da matriz C
-matrix_t *matrix_multiply_parallel(matrix_t *A, matrix_t *B, int nthreads){
+matrix_t *matrix_multiply_parallel(matrix_t *A, matrix_t *B, matrix_t *C, int nthreads){
    if(A->cols != B->rows){
         printf("Impossível multiplicar\n");
         exit(EXIT_FAILURE);
@@ -104,8 +101,6 @@ matrix_t *matrix_multiply_parallel(matrix_t *A, matrix_t *B, int nthreads){
     int ncols = B->cols;
     int i;
     long long int x;
-
-    matrix_t *C = matrix_create(nrows, ncols);
 
     if(nthreads > nrows){ //Não é possível dividir entre todas a threads
         nthreads = nrows;
@@ -740,70 +735,3 @@ void merge(double *vet, int l, int m, int r){
         k++;
     }
 }
-
-// matrix_t *matrix_sort_parallel(matrix_t *A){
-//
-// DadosThread *dt = NULL;
-//      pthread_t *threads = NULL;
-//
-//      if (!(dt = (DadosThread *) malloc(sizeof(DadosThread) * nthreads))) {
-//         printf("Erro ao alocar dados da thread...\n");
-//         exit(EXIT_FAILURE);
-//      }
-//
-//      if (!(threads = (pthread_t *) malloc(sizeof(pthread_t) * nthreads))) {
-//          printf("Erro ao alocar as threads...\n");
-//                 exit(EXIT_FAILURE);
-//      }
-//
-//      int nrows = A->rows;
-//      int ncols = A->cols;
-//      int i;
-//      long long int x;
-//
-//      matrix_t *C = matrix_create(nrows, ncols);
-//
-//      if(nthreads > nrows){ //Não é possível dividir entre todas a threads
-//          nthreads = nrows;
-//          for (i = 0; i < nthreads; i++) {
-//              dt[i].id = i;
-//              dt[i].l_i = i;
-//              dt[i].l_f = i;
-//
-//              dt[i].A = A;
-//              dt[i].B = B;
-//              dt[i].C = C;
-//              pthread_create(&threads[i], NULL, multiply_thread, (void *) (dt + i));
-//          }
-//      }
-//      else{
-//          x = nrows / nthreads;
-//          for (i = 0; i < nthreads-1; i++) {
-//              dt[i].id = i;
-//              dt[i].l_i = x*i;
-//              dt[i].l_f = x*i + x - 1;
-//
-//              dt[i].A = A;
-//              dt[i].B = B;
-//              dt[i].C = C;
-//              pthread_create(&threads[i], NULL, multiply_thread, (void *) (dt + i));
-//          }
-//          dt[i].id = i;
-//          dt[i].l_i = x*i;
-//          dt[i].l_f = nrows - 1;
-//
-//          dt[i].A = A;
-//          dt[i].B = B;
-//          dt[i].C = C;
-//          pthread_create(&threads[i], NULL, multiply_thread, (void *) (dt + i));
-//      }
-//
-//      for (i = 0; i < nthreads; i++) {
-//          pthread_join(threads[i], NULL);
-//      }
-//
-//      free(dt);
-//      free(threads);
-//
-//      return C;
-// }

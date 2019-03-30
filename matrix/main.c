@@ -30,54 +30,62 @@ int main(int argc, char **argv){
 
     m1 = matrix_create(nrows, ncols);
     matrix_randfill(m1);
+    // printf("\nm1:\n"); matrix_print(m1);
 
     m2 = matrix_create(nrows, ncols);
     matrix_randfill(m2);
+    // printf("\nm2:\n"); matrix_print(m2);
 
     m3 = matrix_create(m1->rows, m2->cols);
-    matrix_fill(m3, 0.0);
+    // printf("\nm3:\n"); matrix_print(m3);
 
-    start_time = wtime();
 
     switch(exec){
         case 0:
-            m3 = matrix_sum_serial(m1, m2);
+            start_time = wtime();
+
+            m1 = matrix_sum_serial(m1, m2);
             break;
 
         case 1:
-            m3 = matrix_sum_parallel(m1, m2, nthreads);
+            start_time = wtime();
+
+            m1 = matrix_sum_parallel(m1, m2, nthreads);
             break;
 
         case 2:
+            start_time = wtime();
+            
             m3 = matrix_multiply_serial(m1, m2, m3);
             break;
 
         case 3:
+            start_time = wtime();
+
             m3 = matrix_multiply_parallel(m1, m2, m3, nthreads);
             break;
         
         case 4:
-            m1 = matrix_sort_serial(m1);
+            start_time = wtime();
+
+            matrix_sort_serial(m1);
+            break;
+
+        case 5:
+            start_time = wtime();
+
+            matrix_sort_p(m1, nthreads);
             break;
     }
 
     end_time = wtime();
 
 
-    // printf("\nm1:\n");
-    // matrix_print(m1);
-    // printf("Acabou\n");
-    //
-    // printf("\nm2:\n");
-    // matrix_print(m2);
-    //
-    // printf("\nm3:\n");
-    // matrix_print(m3);
+    // printf("\nm1:\n"); matrix_print(m1);
 
-    matrix_destroy(m1);
-    matrix_destroy(m2);
-    matrix_destroy(m3);
-
+    matrix_destroy(m1); // printf("1 - OK\n");
+    matrix_destroy(m2); // printf("2 - OK\n");
+    matrix_destroy(m3); // printf("3 - OK\n\n");
 
     printf("%f\n",end_time - start_time);
     fflush(stdout);

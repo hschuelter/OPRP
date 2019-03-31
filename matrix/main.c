@@ -86,7 +86,7 @@ int main(int argc, char **argv){
         case 5:
             start_time = wtime();
 
-            // matrix_sort_p(m1, nthreads);
+            matrix_sort_p(m1, nthreads);
             break;
     }
 

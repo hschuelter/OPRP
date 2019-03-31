@@ -406,7 +406,7 @@ void *mergesort_thread(void *arg){
             int mid = l_start + size - 1;
             int r_end = min(l_start + 2*size - 1, n-1);
 
-            merge(p->vet, l_start, mid, r_end);
+            // merge(p->vet, l_start, mid, r_end);
 
         }
     }
@@ -445,10 +445,10 @@ void *mergesort_thread(void *arg){
 	    				// p->manip_atual[p->id + combined_threads][1]);
 
 
-	    			merge(&p->C->data[0][0],
-	    				p->manip_atual[p->id][0],
-	    				p->manip_atual[p->id][1],
-	    				p->manip_atual[p->id + combined_threads][1]);
+	    			// merge(&p->C->data[0][0],
+	    			// 	p->manip_atual[p->id][0],
+	    			// 	p->manip_atual[p->id][1],
+	    			// 	p->manip_atual[p->id + combined_threads][1]);
 
 	    			p->manip_atual[p->id][1] = p->manip_atual[p->id + combined_threads][1];
 
@@ -477,10 +477,10 @@ void *mergesort_thread(void *arg){
 			// p->manip_atual[p->id + p->nthreads-1][1]);
 
 
-		merge(&p->C->data[0][0],
-			p->manip_atual[p->id][0],
-			p->manip_atual[p->id][1],
-			p->manip_atual[p->id + p->nthreads-1][1]);
+		// merge(&p->C->data[0][0],
+		// 	p->manip_atual[p->id][0],
+		// 	p->manip_atual[p->id][1],
+		// 	p->manip_atual[p->id + p->nthreads-1][1]);
 
 		// pthread_mutex_unlock(&p->mutexes[p->id + p->nthreads - 1]);
 		// pthread_mutex_unlock(&p->mutexes[p->id]);
@@ -508,10 +508,10 @@ void *mergesort_thread(void *arg){
 	    				// p->manip_atual[p->id + combined_threads][1]);
 
 
-	    			merge(&p->C->data[0][0],
-	    				p->manip_atual[p->id][0],
-	    				p->manip_atual[p->id][1],
-	    				p->manip_atual[p->id + combined_threads][1]);
+	    			// merge(&p->C->data[0][0],
+	    			// 	p->manip_atual[p->id][0],
+	    			// 	p->manip_atual[p->id][1],
+	    			// 	p->manip_atual[p->id + combined_threads][1]);
 
 	    			p->manip_atual[p->id][1] = p->manip_atual[p->id + combined_threads][1];
 
@@ -554,73 +554,50 @@ int last_two_multiple(int n){
 	return temp/2;
 }
 
-
-
-// void *mergesort(void *data){
-//     sort_info* d = (sort_info*) data;
-//     int size, l_start;
-//     // int n = A->rows * A->cols;
-//
-//     int left, right;
-//     left = d->left;
-//     right = d->right;
-//
-//
-//
-//     if(left < right){
-//         int mid = d->left + (right - left) / 2;
-//
-//         if(pow(2, d->cont+1) < d->nthreads){
-//
-//             d->right = mid;
-//             d->cont = d->cont+1;
-//             mergesort(d);
-//
-//             pthread_t *thread = NULL;
-//
-//             if (!(thread = (pthread_t *) malloc(sizeof(pthread_t)))) {
-//                 printf("Erro ao alocar as threads...\n");
-//                 exit(EXIT_FAILURE);
-//             }
-//
-//             sort_info* d_new = (sort_info*) malloc(sizeof(sort_info));
-//             d_new->mat = d->mat;
-//             d_new->left = mid+1;
-//             d_new->right = right;
-//             d_new->cont = d->cont;
-//             d_new->nthreads = d->nthreads;
-//             pthread_create(thread, NULL, mergesort, (void *) (d_new));
-//         }
-//
-//         else{
-//             d->right = mid;
-//             d->cont = d->cont+1;
-//             mergesort(d);
-//
-//             d->left = mid+1;
-//             d->right = right;
-//             mergesort(d);
-//         }
-//
-//         merge(d->mat->data[0], left, mid, right);
-//     }
-//
-//
-//     // for(size = 1; size < n; size *= 2){
-//     //     for(l_start = 0; l_start < n-1; l_start += 2*size){
-//     //         int r_end = min(l_start + 2*size - 1, n-1);
-//
-//     //         merge(C->data[0], l_start, mid, r_end);
-//     //     }
-//     // }
-// }
-
-
 matrix_t* matrix_sort_serial(matrix_t* m){
     int size = m->rows * m->cols;
 
-    iterative_quick_sort(m->data[0], 0, size-1);
+    iterative_merge_sort(m->data[0], 0, size-1);
     return m;
+}
+
+matrix_t* matrix_sort_p(matrix_t* mat, int nthreads){
+    thread_info* info = NULL;
+    pthread_t *threads = NULL;
+
+    if (!(info = (thread_info*) malloc(sizeof(thread_info) * nthreads))) {
+        printf("Erro ao alocar dados da thread...\n");
+        exit(EXIT_FAILURE);
+    }
+
+    if (!(threads = (pthread_t *) malloc(sizeof(pthread_t) * nthreads))) {
+        printf("Erro ao alocar as threads...\n");
+        exit(EXIT_FAILURE);
+    }
+    thread_sort_setup(info, mat, nthreads);
+    int i;
+    for(i = 0; i < nthreads; i++){
+        pthread_create(&threads[i], NULL, sort_thread, (void*) (info + i));
+    }
+
+    for(i = 0; i < nthreads; i++){
+        pthread_join(threads[i], NULL);
+    }
+
+    int size = mat->rows * mat->cols;
+    double* temp1 = (double*) malloc(sizeof(double) * size);
+    double* temp2 = (double*) malloc(sizeof(double) * size);
+    
+    for(i = 1; i < nthreads; i *= 2){
+        int j;
+        for(j = 0; j + i < nthreads; j += 2*i){
+            merge(mat->data[0], info[j].left, info[j].right, info[j+i].right, temp1, temp2);
+            info[j].right = info[j+i].right;
+        }
+    }
+
+    // merge(mat->data[0], info[0].left, size/2-1, info[1].right, temp1, temp2);
+
 }
 
 matrix_t* matrix_sort_parallel(matrix_t* mat, int nthreads){
@@ -667,72 +644,9 @@ matrix_t* matrix_sort_parallel(matrix_t* mat, int nthreads){
 }
 
 void* sort_thread(void* arg){
-    DadosThread *data = (DadosThread *) arg;
+    thread_info *data = (thread_info *) arg;
 
-    recursive_merge_sort(data->A, data->l_i, data->l_f);
-
-    return NULL;
-}
-
-
-void recursive_merge_sort(matrix_t* mat, int l, int r){
-    if (l < r) {
-        int m = l+(r-l)/2;
-
-        recursive_merge_sort(mat, l, m);
-        recursive_merge_sort(mat, m+1, r);
-
-        merge(mat->data[0], l, m, r);
-    }
-}
-
-void iterative_merge_sort(double* vet, int size){
-    int current; 
-    int left, mid, right;
-
-  
-    for (current = 1; current <= size - 1; current = 2 * current){
-        // array_print(vet, 0, size-1);
-        for (left = 0; left < size - 1; left += 2 * current) {
-            right = min(left + 2*current - 1, size - 1); 
-            mid = left + current -1;
-            
-            if(mid > size) continue;
-
-            // array_print(vet, left, right);
-            printf("%d -> %d | %d\n", left, right, mid);
-            merge(vet, left, mid, right);
-            // array_print(vet, left, right);
-            // printf("\n");
-        } 
-    }
-    merge(vet, 0, mid, right);
-}
-
-void merge(double *vet, int l, int m, int r){    
-    long int i, j, k;
-    int n1 = m - l + 1;
-    int n2 =  r - m;
-
-    double L[n1], R[n2];
-
-    for (i = 0; i < n1; i++)
-        L[i] = vet[l + i];
-
-    for (j = 0; j < n2; j++)
-        R[j] = vet[m + j + 1];
-    
-
-    i = 0; j = 0; k = l;
-    while (i < n1 && j < n2){
-        if (L[i] <= R[j]) vet[k] = L[i++];
-        else vet[k] = R[j++];
-        k++;
-    }
-
-    while (i < n1) vet[k++] = L[i++];
-
-    while (j < n2) vet[k++] = R[j++];
+    iterative_merge_sort(data->vet, data->left, data->right);
 }
 
 
@@ -745,14 +659,82 @@ void thread_sort_setup(thread_info* t_info, matrix_t* m, int nthreads){
     for (i = 0; i < nthreads - 1; i++) {
        t_info[i].left = part * i;
        t_info[i].right = part * (i + 1) - 1;
-       t_info[i].vet = &m->data[0][t_info[i].left];
+       t_info[i].vet = m->data[0];
     }
     // Caso não aconteca divisao perfeita entre o tamanho da matriz 
     // e o numero de threads, a ultima thread pega o restante.
     t_info[i].left = part * i;
     t_info[i].right = size - 1;
-    t_info[i].vet = &m->data[0][t_info[i].left];
+    t_info[i].vet = m->data[0];
 }
+
+void recursive_merge_sort(matrix_t* mat, int l, int r){
+    if (l < r) {
+        int m = l+(r-l)/2;
+
+        recursive_merge_sort(mat, l, m);
+        recursive_merge_sort(mat, m+1, r);
+
+        // merge(mat->data[0], l, m, r);
+    }
+}
+
+void iterative_merge_sort(double* vet, int begin, int end){
+    int current; 
+    int left, mid, right;
+
+    int size = (end - begin + 1);
+    double* temp1 = (double*) malloc(sizeof(double) * size);
+    double* temp2 = (double*) malloc(sizeof(double) * size);
+
+    for (current = 1; current < size; current = 2 * current){
+        // array_print(vet, 0, size-1);
+        for (left = begin; left < end; left += 2 * current) {
+            right = min(left + 2*current - 1, end); 
+            mid = left + current -1;
+            
+            if(mid > end) continue;
+
+            // array_print(vet, left, right);
+            // printf("%d -> %d | %d\n", left, right, mid);
+            merge(vet, left, mid, right, temp1, temp2);
+            // array_print(vet, left, right);
+            // printf("\n");
+        } 
+    }
+    // merge(vet, 0, mid, right);
+}
+
+void merge(double *vet, int l, int m, int r, double* L, double* R){   
+    long int i, j, k;
+    int n1 = m - l + 1;
+    int n2 =  r - m;
+
+    for (i = 0; i < n1; i++)
+        L[i] = vet[l + i];
+
+    for (j = 0; j < n2; j++)
+        R[j] = vet[m + j + 1];
+
+    // array_print(L, 0, n1-1);
+    // array_print(R, 0, n2-1);
+    
+
+    i = 0; j = 0; k = l;
+    while (i < n1 && j < n2){
+        if (L[i] <= R[j]) vet[k] = L[i++];
+        else vet[k] = R[j++];
+        k++;
+    }
+
+    while (i < n1) vet[k++] = L[i++];
+
+    while (j < n2) vet[k++] = R[j++];
+
+    // free(L); free(R);
+}
+
+
 
 
 void iterative_quick_sort(double* vet, int left, int right){

@@ -36,10 +36,6 @@ typedef struct {
     int left;
     int right;
 
-    pthread_t* threads;
-
-    int deep;
-    int max_deep;
 } thread_info;
 
 /*
@@ -73,12 +69,14 @@ matrix_t *coisa_merge(DadosThread *dt, int nthreads, int rows, int cols);
 void *mergesort(void *data);
 
 matrix_t* matrix_sort_serial(matrix_t* m);
+matrix_t* matrix_sort_p(matrix_t* mat, int nthreads);
 matrix_t* matrix_sort_parallel(matrix_t* mat, int nthreads);
 void* sort_thread(void* arg); 
+void thread_sort_setup(thread_info* t_info, matrix_t* m, int nthreads);
 
 void recursive_merge_sort(matrix_t *mat, int l, int r);
-void iterative_merge_sort(double* vet, int size);
-void merge(double *vet, int l, int m, int r);
+void iterative_merge_sort(double* vet, int begin, int end);
+void merge(double *vet, int l, int m, int r, double* L, double* R);
 
 void iterative_quick_sort(double* vet, int left, int right);
 int quick_partition(double* vet, int left, int right);

@@ -16,6 +16,19 @@ int main(int argc, char **argv){
     double start_time, end_time;
     int nrows, ncols, nthreads, exec;
 
+    double* teste = (double*) malloc(sizeof(double) * 10);
+    teste[0] = 7;
+    teste[1] = 0;
+    teste[2] = 8;
+    teste[3] = 3;
+    teste[4] = 9;
+    teste[5] = 4;
+    teste[6] = 6;
+    teste[7] = 2;
+    teste[8] = 5;
+    teste[9] = 1;
+
+
     matrix_t *m1, *m2, *m3;
 
     if ((argc != 5)) {
@@ -67,14 +80,13 @@ int main(int argc, char **argv){
         
         case 4:
             start_time = wtime();
-
             matrix_sort_serial(m1);
             break;
 
         case 5:
             start_time = wtime();
 
-            matrix_sort_p(m1, nthreads);
+            // matrix_sort_p(m1, nthreads);
             break;
     }
 
@@ -82,6 +94,7 @@ int main(int argc, char **argv){
 
 
     // printf("\nm1:\n"); matrix_print(m1);
+
 
     matrix_destroy(m1); // printf("1 - OK\n");
     matrix_destroy(m2); // printf("2 - OK\n");

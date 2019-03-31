@@ -9,15 +9,15 @@ done
 printf "\n" >> "q_sort.txt"
 
 
-# echo "Pralelo:"
+echo "Pralelo:"
 
-# for i in `seq 1 8`
-# do
-#     for j in `seq 0 9`
-#     do
-#         ./main 8000 8000 ${i} 3 >> "q_sort.txt"
-#     done
-#     printf "\n" >> "q_sort.txt"
+for i in `seq 1 8`
+do
+    for j in `seq 0 9`
+    do
+        ./main 8000 8000 ${i} 5 >> "q_sort.txt"
+    done
+    printf "\n" >> "q_sort.txt"
 
 # done
 # printf "\n"

@@ -31,10 +31,15 @@ typedef struct {
 } DadosThread;
 
 typedef struct {
-    matrix_t* m;
+    int id;
     double* vet;
     int left;
     int right;
+
+    pthread_t* threads;
+
+    int deep;
+    int max_deep;
 } thread_info;
 
 /*
@@ -72,11 +77,8 @@ matrix_t* matrix_sort_parallel(matrix_t* mat, int nthreads);
 void* sort_thread(void* arg); 
 
 void recursive_merge_sort(matrix_t *mat, int l, int r);
-void iterative_merge_sort(matrix_t *mat, int size);
+void iterative_merge_sort(double* vet, int size);
 void merge(double *vet, int l, int m, int r);
-
-matrix_t* matrix_sort_p(matrix_t* mat, int nthreads);
-void* quick_sort_thread(void* arg);
 
 void iterative_quick_sort(double* vet, int left, int right);
 int quick_partition(double* vet, int left, int right);

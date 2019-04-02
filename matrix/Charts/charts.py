@@ -13,7 +13,7 @@ def setup():
 
     sp = np.zeros((8,), dtype=float);
 
-    sum_info = open('merge-sort.txt', 'r')
+    sum_info = open('sum-2.txt', 'r')
     sum_info = sum_info.read().split('\n')
     for i in range(0,9):
         sum_info.remove("");
@@ -48,9 +48,11 @@ def plot_chart(speedup):
 
     plt.plot(ideal, color='black')
     plt.plot(speedup, color='blue')
-    plt.xlabel('Numero de cores')
+    plt.grid(axis='both')
+    plt.xlabel('Número de threads')
     plt.ylabel('Speedup')
-    plt.title('Speedup da Ordenação')
+    plt.suptitle('Speedup da Adição', fontsize = 16)
+    plt.title('Intel(R) Core(TM) i7-4510U CPU @ 2.00GHz', fontsize = 10, loc='left')
     plt.show()
 
 def main():

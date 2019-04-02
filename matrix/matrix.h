@@ -49,8 +49,8 @@ void matrix_destroy(matrix_t *m);
 void matrix_randfill(matrix_t *m);
 void matrix_fill(matrix_t *m, double val);
 
-void array_print(double* vet, int begin, int end);
 void matrix_print(matrix_t *m);
+void array_print(double* vet, int begin, int end);
 
 matrix_t *matrix_sum_serial(matrix_t *A, matrix_t *B);
 matrix_t *matrix_sum_parallel(matrix_t *A, matrix_t *B, int nthreads);
@@ -62,15 +62,8 @@ void *multiply_thread(void *arg);
 
 /*======================================*/
 
-matrix_t *mergesort_parallel(matrix_t* A, int nthreads);
-void *mergesort_thread(void *arg);
-matrix_t *coisa_merge(DadosThread *dt, int nthreads, int rows, int cols);
-
-void *mergesort(void *data);
-
 matrix_t* matrix_sort_serial(matrix_t* m);
 matrix_t* matrix_sort_p(matrix_t* mat, int nthreads);
-matrix_t* matrix_sort_parallel(matrix_t* mat, int nthreads);
 void* sort_thread(void* arg); 
 void thread_sort_setup(thread_info* t_info, matrix_t* m, int nthreads);
 
@@ -78,12 +71,7 @@ void recursive_merge_sort(matrix_t *mat, int l, int r);
 void iterative_merge_sort(double* vet, int begin, int end);
 void merge(double *vet, int l, int m, int r, double* L, double* R);
 
-void iterative_quick_sort(double* vet, int left, int right);
-int quick_partition(double* vet, int left, int right);
-
 int min(int x, int y);
 void swap(double* a, double* b);
-
-int last_two_multiple(int n);
 
 #endif

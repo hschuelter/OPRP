@@ -52,40 +52,30 @@ int main(int argc, char **argv){
     m3 = matrix_create(m1->rows, m2->cols);
     // printf("\nm3:\n"); matrix_print(m3);
 
+    start_time = wtime();
 
     switch(exec){
         case 0:
-            start_time = wtime();
-
             m1 = matrix_sum_serial(m1, m2);
             break;
 
         case 1:
-            start_time = wtime();
-
             m1 = matrix_sum_parallel(m1, m2, nthreads);
             break;
 
         case 2:
-            start_time = wtime();
-            
             m3 = matrix_multiply_serial(m1, m2, m3);
             break;
 
         case 3:
-            start_time = wtime();
-
             m3 = matrix_multiply_parallel(m1, m2, m3, nthreads);
             break;
         
         case 4:
-            start_time = wtime();
             matrix_sort_serial(m1);
             break;
 
         case 5:
-            start_time = wtime();
-
             matrix_sort_p(m1, nthreads);
             break;
     }
@@ -93,12 +83,9 @@ int main(int argc, char **argv){
     end_time = wtime();
 
 
-    // printf("\nm1:\n"); matrix_print(m1);
-
-
-    matrix_destroy(m1); // printf("1 - OK\n");
-    matrix_destroy(m2); // printf("2 - OK\n");
-    matrix_destroy(m3); // printf("3 - OK\n\n");
+    matrix_destroy(m1);
+    matrix_destroy(m2);
+    matrix_destroy(m3);
 
     printf("%f\n",end_time - start_time);
     fflush(stdout);

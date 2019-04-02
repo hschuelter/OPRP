@@ -13,7 +13,7 @@ def setup():
 
     sp = np.zeros((8,), dtype=float);
 
-    sum_info = open('m_sort.txt', 'r')
+    sum_info = open('merge-sort.txt', 'r')
     sum_info = sum_info.read().split('\n')
     for i in range(0,9):
         sum_info.remove("");

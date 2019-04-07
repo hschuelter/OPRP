@@ -10,10 +10,10 @@ import matplotlib.pyplot as plt
 def setup():
     ts = 0
     tp = np.zeros((8,), dtype=float)
-    tp_omp = np.zeros((8,), dtype=float)
+    tp_omp = np.zeros((9,), dtype=float)
 
     sp = np.zeros((8,), dtype=float)
-    sp_omp = np.zeros((8,), dtype=float)
+    sp_omp = np.zeros((9,), dtype=float)
 
     sum_info = open('sum-1.txt', 'r')
     sum_info = sum_info.read().split('\n')
@@ -24,26 +24,28 @@ def setup():
     for i in range(0,9):
         sum_info.remove("")
         omp_sum.remove("")
-
+    omp_sum.remove("")
+    
     for i in range(0,10):
         ts += float(sum_info[i])
 
     for i in range(1,9):
+        print(i)
         for j in range(0,10):
             tp[i-1] += float(sum_info[10*i + j])
         tp[i-1] /= 10
         
-    for i in range(0,8):
+    for i in range(0,9):
         for j in range(0,9):
-            tp_omp[i-1] += float(omp_sum[10*i + j])
-        tp_omp[i-1]
-
-    print(omp_sum[0])
+            tp_omp[i] += float(omp_sum[10*i + j])
+        tp_omp[i] /= 10
 
     ts /= 10.0
 
     for i in range(0, 8):
         sp[i] = ts / tp[i]
+
+    for i in range(1, 9):
         sp_omp[i] = ts / tp_omp[i]
 
     return sp, sp_omp
@@ -52,7 +54,6 @@ def plot_chart(speedup, speed_omp):
     ideal = []
 
     speedup = np.insert(speedup, 0, 0, axis=0)
-    speed_omp = np.insert(speed_omp, 0, 0, axis=0)
     print(speedup)
     print(speed_omp)
 

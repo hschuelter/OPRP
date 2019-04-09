@@ -25,7 +25,7 @@ def setup():
         sum_info.remove("")
         omp_sum.remove("")
     omp_sum.remove("")
-    
+
     for i in range(0,10):
         ts += float(sum_info[i])
 
@@ -34,7 +34,7 @@ def setup():
         for j in range(0,10):
             tp[i-1] += float(sum_info[10*i + j])
         tp[i-1] /= 10
-        
+
     for i in range(0,9):
         for j in range(0,9):
             tp_omp[i] += float(omp_sum[10*i + j])
@@ -64,9 +64,13 @@ def plot_chart(speedup, speed_omp):
     plt.ylim(1, 8)
     plt.xlim(1, 8)
 
-    plt.plot(ideal, color='black')
-    plt.plot(speedup, color='blue')
-    plt.plot(speed_omp, color='green')
+
+    plt.plot(ideal, color='black', label='Ideal')
+    plt.plot(speedup, color='blue', label='Threads')
+    plt.plot(speed_omp, color='green', label='OpenMP')
+
+    plt.legend(loc='upper left', shadow=True, fontsize=10)
+
     plt.grid(axis='both')
     plt.xlabel('Número de threads')
     plt.ylabel('Speedup')

@@ -4,9 +4,9 @@ echo "Serial:"
 
 for i in `seq 0 9`
 do
-    ./a.out 10000 10000 1 0 >> "sum-1.txt"
+    ./a.out 2000 2000 1 3 >> "mul-1.txt"
 done
-printf "\n" >> "sum-1.txt"
+printf "\n" >> "mul-1.txt"
 
 
 echo "Paralelo Threads:"
@@ -14,21 +14,21 @@ for i in `seq 1 8`
 do
     for j in `seq 0 9`
     do
-        ./a.out 10000 10000 ${i} 1 >> "sum-1.txt"
+        ./a.out 2000 2000 ${i} 4 >> "mul-1.txt"
     done
-    printf "\n" >> "sum-1.txt"
+    printf "\n" >> "mul-1.txt"
 
 done
 
-# printf "\n"  >> "sum.txt"
+# printf "\n"  >> "mul.txt"
 
 echo "Paralelo OPENMP:"
 for i in `seq 1 8`
 do
     for j in `seq 0 9`
     do
-        ./a.out 10000 10000 ${i} 2 >> "sum-2.txt"
+        ./a.out 2000 2000 ${i} 5 >> "mul-2.txt"
     done
-    printf "\n" >> "sum-2.txt"
+    printf "\n" >> "mul-2.txt"
 
 done

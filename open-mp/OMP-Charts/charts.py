@@ -15,16 +15,16 @@ def setup():
     sp = np.zeros((8,), dtype=float)
     sp_omp = np.zeros((9,), dtype=float)
 
-    sum_info = open('sum-1.txt', 'r')
+    sum_info = open('sort-1.txt', 'r')
     sum_info = sum_info.read().split('\n')
 
-    omp_sum =  open('sum-2.txt', 'r')
+    omp_sum =  open('sort-2.txt', 'r')
     omp_sum = omp_sum.read().split('\n')
 
     for i in range(0,9):
         sum_info.remove("")
         omp_sum.remove("")
-    omp_sum.remove("")
+    # omp_sum.remove("")
 
     for i in range(0,10):
         ts += float(sum_info[i])
@@ -74,8 +74,8 @@ def plot_chart(speedup, speed_omp):
     plt.grid(axis='both')
     plt.xlabel('Número de threads')
     plt.ylabel('Speedup')
-    plt.suptitle('Speedup da Adição', fontsize = 16)
-    plt.title('Intel(R) Core(TM) i7-7700 CPU @ 3.60GHz', fontsize = 10, loc='left')
+    plt.suptitle('Speedup da Ordenação', fontsize = 16)
+    plt.title('Intel(R) Core(TM) i7-6700 CPU @ 3.40GHz', fontsize = 10, loc='left')
     plt.show()
 
 def main():

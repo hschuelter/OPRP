@@ -350,7 +350,7 @@ matrix_t* matrix_sort_p(matrix_t* mat, int nthreads){
     int size = mat->rows * mat->cols;
     double* temp1 = (double*) malloc(sizeof(double) * size);
     double* temp2 = (double*) malloc(sizeof(double) * size);
-    
+
     for(i = 1; i < nthreads; i *= 2){
         int j;
         for(j = 0; j + i < nthreads; j += 2*i){
@@ -381,7 +381,7 @@ void thread_sort_setup(thread_info* t_info, matrix_t* m, int nthreads){
        t_info[i].right = part * (i + 1) - 1;
        t_info[i].vet = m->data[0];
     }
-    // Caso não aconteça divisão perfeita entre o tamanho da matriz 
+    // Caso não aconteça divisão perfeita entre o tamanho da matriz
     // e o número de threads, a última thread pega o restante.
     t_info[i].left = part * i;
     t_info[i].right = size - 1;
@@ -389,7 +389,7 @@ void thread_sort_setup(thread_info* t_info, matrix_t* m, int nthreads){
 }
 
 void iterative_merge_sort(double* vet, int begin, int end){
-    int current; 
+    int current;
     int left, mid, right;
 
     int size = (end - begin + 1);
@@ -398,18 +398,18 @@ void iterative_merge_sort(double* vet, int begin, int end){
 
     for (current = 1; current < size; current = 2 * current){
         for (left = begin; left < end; left += 2 * current) {
-            right = min(left + 2*current - 1, end); 
+            right = min(left + 2*current - 1, end);
             mid = left + current -1;
-            
+
             if(mid > end) continue;
 
             merge(vet, left, mid, right, temp1, temp2);
-        } 
+        }
     }
 }
 
 void iterative_merge_sort_openmp(double* vet, int begin, int end, int n){
-    int current; 
+    int current;
     int left, mid, right;
 
     int size = (end - begin + 1);
@@ -419,17 +419,17 @@ void iterative_merge_sort_openmp(double* vet, int begin, int end, int n){
         #pragma omp parallel for shared(vet) num_threads(n) private(left, mid, right)
 
         for (left = begin; left < end; left += 2 * current) {
-            right = min(left + 2*current - 1, end); 
+            right = min(left + 2*current - 1, end);
             mid = left + current -1;
-            
+
             if(mid > end) continue;
 
             merge_openmp(vet, left, mid, right);
-        } 
+        }
     }
 }
 
-void merge_openmp(double *vet, int l, int m, int r){   
+void merge_openmp(double *vet, int l, int m, int r){
     long int i, j, k;
     int n1 = m - l + 1;
     int n2 =  r - m;
@@ -457,7 +457,7 @@ void merge_openmp(double *vet, int l, int m, int r){
 }
 
 
-void merge(double *vet, int l, int m, int r, double* L, double* R){   
+void merge(double *vet, int l, int m, int r, double* L, double* R){
     long int i, j, k;
     int n1 = m - l + 1;
     int n2 =  r - m;

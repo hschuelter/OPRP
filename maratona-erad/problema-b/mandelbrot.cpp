@@ -3,7 +3,7 @@
 
 using namespace std;
 
-int main(){
+int main(int argc, char** argv){
 	int r, c=0;
 	int max_row, max_column, max_n;
 	cin >> max_row;

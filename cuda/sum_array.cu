@@ -1,4 +1,4 @@
-// nvcc sum_array.cu -o sum_array.out
+// nvcc sum_array.cu -o sum_array.out & ./sum_array.out
 #include <stdio.h>
 #define N 10
 
